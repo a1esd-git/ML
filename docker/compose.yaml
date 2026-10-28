@@ -1,0 +1,38 @@
+services:
+  ml-container:
+    build:
+      context: ..                 # Контекст сборки — папка ML/ (на уровень выше)
+      dockerfile: docker/Dockerfile # Путь к Dockerfile относительно контекста
+    image: ml_workspace:latest
+    container_name: ml_workspace
+
+    ports:
+      - "8888:8888"   # Jupyter Lab
+      - "6006:6006"   # TensorBoard
+
+    volumes:
+      - ..:/app                   # Монтируем папку ML/ в /app контейнера
+      - pip-cache:/root/.cache/pip
+
+    working_dir: /app
+
+    environment:
+      - PYTHONUNBUFFERED=1
+
+    command: >
+      jupyter lab
+      --ip=0.0.0.0
+      --port=8888
+      --no-browser
+      --allow-root
+      --ServerApp.token=${JUPYTER_TOKEN}
+      --ServerApp.password=''
+      --ServerApp.root_dir=/app
+
+    tty: true
+    stdin_open: true
+    shm_size: "8gb"
+    restart: unless-stopped
+
+volumes:
+  pip-cache:
